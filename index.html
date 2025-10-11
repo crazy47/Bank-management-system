@@ -1,0 +1,970 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Banking Management System - Admin Panel</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f6f9;
+        }
+
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            height: 100vh;
+            width: 250px;
+            background: #2c3e50;
+            padding-top: 20px;
+            transition: all 0.3s;
+            z-index: 1000;
+        }
+
+        .sidebar .brand {
+            padding: 20px;
+            color: white;
+            text-align: center;
+            border-bottom: 1px solid #34495e;
+        }
+
+        .sidebar .brand h4 {
+            margin: 0;
+            font-size: 1.2rem;
+        }
+
+        .sidebar .nav-item {
+            padding: 15px 20px;
+            color: #bdc3c7;
+            cursor: pointer;
+            transition: all 0.3s;
+            border-left: 4px solid transparent;
+        }
+
+        .sidebar .nav-item:hover {
+            background: #34495e;
+            color: white;
+            border-left: 4px solid #3498db;
+        }
+
+        .sidebar .nav-item.active {
+            background: #34495e;
+            color: white;
+            border-left: 4px solid #3498db;
+        }
+
+        .main-content {
+            margin-left: 250px;
+            padding: 20px;
+            transition: all 0.3s;
+        }
+
+        .top-bar {
+            background: white;
+            padding: 15px 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            border-radius: 5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .stats-card {
+            background: white;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+
+        .stats-card .icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+
+        .stats-card.blue .icon {
+            background: #e3f2fd;
+            color: #2196f3;
+        }
+
+        .stats-card.green .icon {
+            background: #e8f5e9;
+            color: #4caf50;
+        }
+
+        .stats-card.orange .icon {
+            background: #fff3e0;
+            color: #ff9800;
+        }
+
+        .stats-card.red .icon {
+            background: #ffebee;
+            color: #f44336;
+        }
+
+        .content-section {
+            display: none;
+        }
+
+        .content-section.active {
+            display: block;
+        }
+
+        .table-container {
+            background: white;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .btn-action {
+            padding: 5px 10px;
+            font-size: 0.85rem;
+            margin: 0 2px;
+        }
+
+        .modal-header {
+            background: #2c3e50;
+            color: white;
+        }
+
+        .status-badge {
+            padding: 5px 10px;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .status-active {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-inactive {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .status-pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .search-bar {
+            margin-bottom: 20px;
+        }
+
+        .transaction-deposit {
+            color: #28a745;
+            font-weight: bold;
+        }
+
+        .transaction-withdrawal {
+            color: #dc3545;
+            font-weight: bold;
+        }
+
+        .transaction-transfer {
+            color: #007bff;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="brand">
+            <i class="fas fa-university fa-2x mb-2"></i>
+            <h4>BankMS</h4>
+            <small>Management System v1.0</small>
+        </div>
+        <div class="nav-item active" onclick="showSection(event,'dashboard')">
+            <i class="fas fa-tachometer-alt me-2"></i> Dashboard
+        </div>
+        <div class="nav-item" onclick="showSection(event,'customers')">
+            <i class="fas fa-users me-2"></i> Customers
+        </div>
+        <div class="nav-item" onclick="showSection(event,'accounts')">
+            <i class="fas fa-wallet me-2"></i> Accounts
+        </div>
+        <div class="nav-item" onclick="showSection(event,'transactions')">
+            <i class="fas fa-exchange-alt me-2"></i> Transactions
+        </div>
+        <div class="nav-item" onclick="showSection(event,'loans')">
+            <i class="fas fa-hand-holding-usd me-2"></i> Loans
+        </div>
+        <div class="nav-item" onclick="showSection(event,'reports')">
+            <i class="fas fa-chart-bar me-2"></i> Reports
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Top Bar -->
+        <div class="top-bar">
+            <div>
+                <h5 class="mb-0">Banking Management System</h5>
+                <small class="text-muted">Admin Dashboard</small>
+            </div>
+            <div>
+                <span class="me-3"><i class="far fa-bell"></i> <span class="badge bg-danger">3</span></span>
+                <span><i class="far fa-user-circle"></i> Admin User</span>
+            </div>
+        </div>
+
+        <!-- Dashboard Section -->
+        <div id="dashboard" class="content-section active">
+            <h4 class="mb-4">Dashboard Overview</h4>
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="stats-card blue">
+                        <div class="icon"><i class="fas fa-users"></i></div>
+                        <h3 id="totalCustomers">0</h3>
+                        <p class="text-muted mb-0">Total Customers</p>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stats-card green">
+                        <div class="icon"><i class="fas fa-wallet"></i></div>
+                        <h3 id="totalAccounts">0</h3>
+                        <p class="text-muted mb-0">Active Accounts</p>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stats-card orange">
+                        <div class="icon"><i class="fas fa-dollar-sign"></i></div>
+                        <h3 id="totalBalance">$0</h3>
+                        <p class="text-muted mb-0">Total Balance</p>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stats-card red">
+                        <div class="icon"><i class="fas fa-exchange-alt"></i></div>
+                        <h3 id="todayTransactions">0</h3>
+                        <p class="text-muted mb-0">Today's Transactions</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row mt-4">
+                <div class="col-md-6">
+                    <div class="table-container">
+                        <h5 class="mb-3">Recent Transactions</h5>
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Account</th>
+                                    <th>Type</th>
+                                    <th>Amount</th>
+                                    <th>Date</th>
+                                </tr>
+                            </thead>
+                            <tbody id="recentTransactionsTable">
+                                <tr><td colspan="4" class="text-center">No transactions yet</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="table-container">
+                        <h5 class="mb-3">Pending Loan Requests</h5>
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Customer</th>
+                                    <th>Amount</th>
+                                    <th>Type</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="pendingLoansTable">
+                                <tr><td colspan="4" class="text-center">No pending loans</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Customers Section -->
+        <div id="customers" class="content-section">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h4>Customer Management</h4>
+                <button class="btn btn-primary" onclick="openCustomerModal()">
+                    <i class="fas fa-plus me-2"></i>Add Customer
+                </button>
+            </div>
+            
+            <div class="search-bar">
+                <input type="text" class="form-control" id="customerSearch" placeholder="Search customers..." onkeyup="searchCustomers()">
+            </div>
+
+            <div class="table-container">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Phone</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="customersTable">
+                        <tr><td colspan="6" class="text-center">No customers found</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Accounts Section -->
+        <div id="accounts" class="content-section">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h4>Account Management</h4>
+                <button class="btn btn-primary" onclick="openAccountModal()">
+                    <i class="fas fa-plus me-2"></i>Create Account
+                </button>
+            </div>
+
+            <div class="table-container">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Account No.</th>
+                            <th>Customer</th>
+                            <th>Type</th>
+                            <th>Balance</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="accountsTable">
+                        <tr><td colspan="6" class="text-center">No accounts found</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Transactions Section -->
+        <div id="transactions" class="content-section">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h4>Transaction Management</h4>
+                <button class="btn btn-primary" onclick="openTransactionModal()">
+                    <i class="fas fa-plus me-2"></i>New Transaction
+                </button>
+            </div>
+
+            <div class="table-container">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Transaction ID</th>
+                            <th>Account</th>
+                            <th>Type</th>
+                            <th>Amount</th>
+                            <th>Date & Time</th>
+                            <th>Details</th>
+                        </tr>
+                    </thead>
+                    <tbody id="transactionsTable">
+                        <tr><td colspan="6" class="text-center">No transactions found</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Loans Section -->
+        <div id="loans" class="content-section">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h4>Loan Management</h4>
+                <button class="btn btn-primary" onclick="openLoanModal()">
+                    <i class="fas fa-plus me-2"></i>New Loan Request
+                </button>
+            </div>
+
+            <div class="table-container">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Loan ID</th>
+                            <th>Customer</th>
+                            <th>Type</th>
+                            <th>Amount</th>
+                            <th>Interest Rate</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="loansTable">
+                        <tr><td colspan="7" class="text-center">No loans found</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Reports Section -->
+        <div id="reports" class="content-section">
+            <h4 class="mb-4">Reports & Analytics</h4>
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="table-container">
+                        <h5>Generate Reports</h5>
+                        <div class="row mt-3">
+                            <div class="col-md-3">
+                                <button class="btn btn-outline-primary w-100 mb-2" onclick="alert('Customer Report Generated!')">
+                                    <i class="fas fa-users me-2"></i>Customer Report
+                                </button>
+                            </div>
+                            <div class="col-md-3">
+                                <button class="btn btn-outline-success w-100 mb-2" onclick="alert('Transaction Report Generated!')">
+                                    <i class="fas fa-exchange-alt me-2"></i>Transaction Report
+                                </button>
+                            </div>
+                            <div class="col-md-3">
+                                <button class="btn btn-outline-warning w-100 mb-2" onclick="alert('Loan Report Generated!')">
+                                    <i class="fas fa-hand-holding-usd me-2"></i>Loan Report
+                                </button>
+                            </div>
+                            <div class="col-md-3">
+                                <button class="btn btn-outline-info w-100 mb-2" onclick="alert('Financial Report Generated!')">
+                                    <i class="fas fa-chart-line me-2"></i>Financial Report
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Customer Modal -->
+    <div class="modal fade" id="customerModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Add New Customer</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="customerForm">
+                        <div class="mb-3">
+                            <label class="form-label">Full Name</label>
+                            <input type="text" class="form-control" id="customerName" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Email</label>
+                            <input type="email" class="form-control" id="customerEmail" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Phone</label>
+                            <input type="tel" class="form-control" id="customerPhone" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Address</label>
+                            <textarea class="form-control" id="customerAddress" rows="2"></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="addCustomer()">Add Customer</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Account Modal -->
+    <div class="modal fade" id="accountModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Create New Account</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="accountForm">
+                        <div class="mb-3">
+                            <label class="form-label">Select Customer</label>
+                            <select class="form-select" id="accountCustomer" required>
+                                <option value="">Choose customer...</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Account Type</label>
+                            <select class="form-select" id="accountType" required>
+                                <option value="Savings">Savings Account</option>
+                                <option value="Checking">Checking Account</option>
+                                <option value="Business">Business Account</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Initial Deposit</label>
+                            <input type="number" class="form-control" id="initialDeposit" min="0" step="0.01" required>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="createAccount()">Create Account</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Transaction Modal -->
+    <div class="modal fade" id="transactionModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">New Transaction</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="transactionForm">
+                        <div class="mb-3">
+                            <label class="form-label">Account</label>
+                            <select class="form-select" id="transactionAccount" required>
+                                <option value="">Select account...</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Transaction Type</label>
+                            <select class="form-select" id="transactionType" required>
+                                <option value="Deposit">Deposit</option>
+                                <option value="Withdrawal">Withdrawal</option>
+                                <option value="Transfer">Transfer</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Amount</label>
+                            <input type="number" class="form-control" id="transactionAmount" min="0" step="0.01" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Description</label>
+                            <input type="text" class="form-control" id="transactionDescription">
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="addTransaction()">Process Transaction</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loan Modal -->
+    <div class="modal fade" id="loanModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">New Loan Request</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="loanForm">
+                        <div class="mb-3">
+                            <label class="form-label">Select Customer</label>
+                            <select class="form-select" id="loanCustomer" required>
+                                <option value="">Choose customer...</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Loan Type</label>
+                            <select class="form-select" id="loanType" required>
+                                <option value="Personal">Personal Loan</option>
+                                <option value="Home">Home Loan</option>
+                                <option value="Auto">Auto Loan</option>
+                                <option value="Business">Business Loan</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Loan Amount</label>
+                            <input type="number" class="form-control" id="loanAmount" min="0" step="0.01" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Interest Rate (%)</label>
+                            <input type="number" class="form-control" id="loanInterest" min="0" max="100" step="0.1" value="5.5" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Duration (months)</label>
+                            <input type="number" class="form-control" id="loanDuration" min="1" required>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="addLoan()">Submit Request</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Persistent storage helpers
+        const STORAGE_KEYS = {
+            customers: 'bms_customers',
+            accounts: 'bms_accounts',
+            transactions: 'bms_transactions',
+            loans: 'bms_loans',
+            counters: 'bms_counters'
+        };
+
+        let customers = [];
+        let accounts = [];
+        let transactions = [];
+        let loans = [];
+        let counters = { customerId: 1, accountNo: 1000, transactionId: 1, loanId: 1 };
+
+        function saveAll() {
+            localStorage.setItem(STORAGE_KEYS.customers, JSON.stringify(customers));
+            localStorage.setItem(STORAGE_KEYS.accounts, JSON.stringify(accounts));
+            localStorage.setItem(STORAGE_KEYS.transactions, JSON.stringify(transactions));
+            localStorage.setItem(STORAGE_KEYS.loans, JSON.stringify(loans));
+            localStorage.setItem(STORAGE_KEYS.counters, JSON.stringify(counters));
+        }
+
+        function loadAll() {
+            const c = localStorage.getItem(STORAGE_KEYS.customers);
+            const a = localStorage.getItem(STORAGE_KEYS.accounts);
+            const t = localStorage.getItem(STORAGE_KEYS.transactions);
+            const l = localStorage.getItem(STORAGE_KEYS.loans);
+            const ctr = localStorage.getItem(STORAGE_KEYS.counters);
+            customers = c ? JSON.parse(c) : [];
+            accounts = a ? JSON.parse(a) : [];
+            transactions = t ? JSON.parse(t) : [];
+            loans = l ? JSON.parse(l) : [];
+            counters = ctr ? JSON.parse(ctr) : counters;
+        }
+
+        // Sample data for first run
+        function initializeSampleData() {
+            if (customers.length > 0 || accounts.length > 0) return;
+
+            customers.push({ id: counters.customerId++, name: 'John Doe', email: 'john.doe@example.com', phone: '(555) 123-4567', address: '123 Main St', status: 'Active' });
+            customers.push({ id: counters.customerId++, name: 'Jane Smith', email: 'jane.smith@example.com', phone: '(555) 987-6543', address: '456 Oak Ave', status: 'Active' });
+
+            accounts.push({ accountNo: counters.accountNo++, customerId: 1, type: 'Savings', balance: 5000.00, status: 'Active' });
+            accounts.push({ accountNo: counters.accountNo++, customerId: 2, type: 'Checking', balance: 2500.00, status: 'Active' });
+
+            transactions.push({ id: counters.transactionId++, accountNo: 1000, type: 'Deposit', amount: 1000, description: 'Initial deposit', date: new Date().toISOString() });
+            transactions.push({ id: counters.transactionId++, accountNo: 1001, type: 'Withdrawal', amount: 500, description: 'ATM withdrawal', date: new Date().toISOString() });
+
+            loans.push({ id: counters.loanId++, customerId: 1, type: 'Personal', amount: 10000, interestRate: 5.5, duration: 24, status: 'Pending' });
+
+            saveAll();
+        }
+
+        // Navigation
+        function showSection(e, sectionId) {
+            document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            document.getElementById(sectionId).classList.add('active');
+            const navItem = (e && e.currentTarget) ? e.currentTarget : (e && e.target ? e.target.closest('.nav-item') : null);
+            if (navItem) navItem.classList.add('active');
+        }
+
+        // Dashboard
+        function updateDashboard() {
+            document.getElementById('totalCustomers').textContent = customers.length;
+            document.getElementById('totalAccounts').textContent = accounts.filter(a => a.status === 'Active').length;
+            const totalBalance = accounts.reduce((sum, acc) => sum + (parseFloat(acc.balance) || 0), 0);
+            document.getElementById('totalBalance').textContent = formatCurrency(totalBalance);
+            const today = new Date().toDateString();
+            const todayTrans = transactions.filter(t => new Date(t.date).toDateString() === today).length;
+            document.getElementById('todayTransactions').textContent = todayTrans;
+
+            // Recent transactions
+            const recentTrans = transactions.slice(-5).reverse();
+            const transTable = document.getElementById('recentTransactionsTable');
+            if (recentTrans.length === 0) {
+                transTable.innerHTML = '<tr><td colspan="4" class="text-center">No transactions yet</td></tr>';
+            } else {
+                transTable.innerHTML = recentTrans.map(t => {
+                    const typeClass = t.type === 'Deposit' ? 'transaction-deposit' : t.type === 'Withdrawal' ? 'transaction-withdrawal' : 'transaction-transfer';
+                    return `\n                        <tr>\n                            <td>${t.accountNo}</td>\n                            <td class="${typeClass}">${t.type}</td>\n                            <td>${formatCurrency(t.amount)}</td>\n                            <td>${new Date(t.date).toLocaleString()}</td>\n                        </tr>\n                    `;
+                }).join('');
+            }
+
+            // Pending loans
+            const pendingLoans = loans.filter(l => l.status === 'Pending');
+            const loansTable = document.getElementById('pendingLoansTable');
+            if (pendingLoans.length === 0) {
+                loansTable.innerHTML = '<tr><td colspan="4" class="text-center">No pending loans</td></tr>';
+            } else {
+                loansTable.innerHTML = pendingLoans.map(l => {
+                    const customer = customers.find(c => c.id === l.customerId) || { name: 'Unknown' };
+                    return `\n                        <tr>\n                            <td>${customer.name}</td>\n                            <td>${formatCurrency(l.amount)}</td>\n                            <td>${l.type}</td>\n                            <td>\n                                <button class="btn btn-sm btn-success" onclick="approveLoan(${l.id})">Approve</button>\n                                <button class="btn btn-sm btn-danger" onclick="rejectLoan(${l.id})">Reject</button>\n                            </td>\n                        </tr>\n                    `;
+                }).join('');
+            }
+        }
+
+        // Customers
+        function openCustomerModal() {
+            document.getElementById('customerForm').reset();
+            new bootstrap.Modal(document.getElementById('customerModal')).show();
+        }
+
+        function addCustomer() {
+            const name = document.getElementById('customerName').value.trim();
+            const email = document.getElementById('customerEmail').value.trim();
+            const phone = document.getElementById('customerPhone').value.trim();
+            const address = document.getElementById('customerAddress').value.trim();
+            if (!name || !email) return alert('Name and email are required');
+            const newCustomer = { id: counters.customerId++, name, email, phone, address, status: 'Active' };
+            customers.push(newCustomer);
+            saveAll();
+            renderCustomers();
+            populateSelects();
+            updateDashboard();
+            bootstrap.Modal.getInstance(document.getElementById('customerModal')).hide();
+        }
+
+        function renderCustomers(filter = '') {
+            const tbody = document.getElementById('customersTable');
+            let list = customers;
+            if (filter) {
+                const q = filter.toLowerCase();
+                list = customers.filter(c => `${c.name} ${c.email} ${c.phone}`.toLowerCase().includes(q));
+            }
+            if (list.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" class="text-center">No customers found</td></tr>';
+                return;
+            }
+            tbody.innerHTML = list.map(c => `\n                <tr>\n                    <td>${c.id}</td>\n                    <td>${c.name}</td>\n                    <td>${c.email}</td>\n                    <td>${c.phone || ''}</td>\n                    <td><span class="status-badge ${c.status === 'Active' ? 'status-active' : 'status-inactive'}">${c.status}</span></td>\n                    <td>\n                        <button class="btn btn-sm btn-primary" onclick="viewCustomer(${c.id})">View</button>\n                        <button class="btn btn-sm btn-danger" onclick="deleteCustomer(${c.id})">Delete</button>\n                    </td>\n                </tr>\n            `).join('');
+        }
+
+        function viewCustomer(id) {
+            const c = customers.find(x => x.id === id);
+            if (!c) return alert('Customer not found');
+            alert(`${c.name}\nEmail: ${c.email}\nPhone: ${c.phone}\nAddress: ${c.address}`);
+        }
+
+        function deleteCustomer(id) {
+            if (!confirm('Delete customer? This will not remove related accounts in this demo.')) return;
+            customers = customers.filter(c => c.id !== id);
+            saveAll();
+            renderCustomers();
+            populateSelects();
+            updateDashboard();
+        }
+
+        function searchCustomers() {
+            const q = document.getElementById('customerSearch').value.trim();
+            renderCustomers(q);
+        }
+
+        // Accounts
+        function openAccountModal() {
+            document.getElementById('accountForm').reset();
+            populateAccountCustomerSelect();
+            new bootstrap.Modal(document.getElementById('accountModal')).show();
+        }
+
+        function populateAccountCustomerSelect() {
+            const sel = document.getElementById('accountCustomer');
+            sel.innerHTML = '<option value="">Choose customer...</option>' + customers.map(c => `<option value="${c.id}">${c.name} (#${c.id})</option>`).join('');
+        }
+
+        function createAccount() {
+            const customerId = parseInt(document.getElementById('accountCustomer').value);
+            const type = document.getElementById('accountType').value;
+            const initialDeposit = parseFloat(document.getElementById('initialDeposit').value) || 0;
+            if (!customerId) return alert('Select a customer');
+            const newAcc = { accountNo: counters.accountNo++, customerId, type, balance: parseFloat(initialDeposit), status: 'Active' };
+            accounts.push(newAcc);
+            transactions.push({ id: counters.transactionId++, accountNo: newAcc.accountNo, type: 'Deposit', amount: initialDeposit, description: 'Initial deposit', date: new Date().toISOString() });
+            saveAll();
+            renderAccounts();
+            populateSelects();
+            updateDashboard();
+            bootstrap.Modal.getInstance(document.getElementById('accountModal')).hide();
+        }
+
+        function renderAccounts() {
+            const tbody = document.getElementById('accountsTable');
+            if (accounts.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" class="text-center">No accounts found</td></tr>';
+                return;
+            }
+            tbody.innerHTML = accounts.map(a => `\n                <tr>\n                    <td>${a.accountNo}</td>\n                    <td>${getCustomerName(a.customerId)}</td>\n                    <td>${a.type}</td>\n                    <td>${formatCurrency(a.balance)}</td>\n                    <td><span class="status-badge ${a.status === 'Active' ? 'status-active' : 'status-inactive'}">${a.status}</span></td>\n                    <td>\n                        <button class="btn btn-sm btn-success" onclick="quickDeposit(${a.accountNo})">Deposit</button>\n                        <button class="btn btn-sm btn-warning" onclick="quickWithdraw(${a.accountNo})">Withdraw</button>\n                    </td>\n                </tr>\n            `).join('');
+        }
+
+        function getCustomerName(id) { const c = customers.find(x => x.id === id); return c ? c.name : 'Unknown'; }
+
+        function quickDeposit(accountNo) {
+            const amt = parseFloat(prompt('Amount to deposit:')) || 0;
+            if (amt <= 0) return;
+            const acc = accounts.find(a => a.accountNo === accountNo);
+            acc.balance = parseFloat(acc.balance) + amt;
+            transactions.push({ id: counters.transactionId++, accountNo, type: 'Deposit', amount: amt, description: 'Quick deposit', date: new Date().toISOString() });
+            saveAll(); renderAccounts(); renderTransactions(); updateDashboard();
+        }
+
+        function quickWithdraw(accountNo) {
+            const amt = parseFloat(prompt('Amount to withdraw:')) || 0;
+            if (amt <= 0) return;
+            const acc = accounts.find(a => a.accountNo === accountNo);
+            if (amt > acc.balance) return alert('Insufficient funds');
+            acc.balance = parseFloat(acc.balance) - amt;
+            transactions.push({ id: counters.transactionId++, accountNo, type: 'Withdrawal', amount: amt, description: 'Quick withdrawal', date: new Date().toISOString() });
+            saveAll(); renderAccounts(); renderTransactions(); updateDashboard();
+        }
+
+        // Transactions
+        function openTransactionModal() {
+            document.getElementById('transactionForm').reset();
+            populateTransactionAccountSelect();
+            new bootstrap.Modal(document.getElementById('transactionModal')).show();
+        }
+
+        function populateTransactionAccountSelect() {
+            const sel = document.getElementById('transactionAccount');
+            sel.innerHTML = '<option value="">Select account...</option>' + accounts.map(a => `<option value="${a.accountNo}">${a.accountNo} - ${getCustomerName(a.customerId)} (${a.type})</option>`).join('');
+        }
+
+        function addTransaction() {
+            const accountNo = parseInt(document.getElementById('transactionAccount').value);
+            const type = document.getElementById('transactionType').value;
+            const amount = parseFloat(document.getElementById('transactionAmount').value) || 0;
+            const description = document.getElementById('transactionDescription').value || '';
+            if (!accountNo || amount <= 0) return alert('Select account and enter amount');
+            const acc = accounts.find(a => a.accountNo === accountNo);
+            if (!acc) return alert('Account not found');
+            if (type === 'Withdrawal' && amount > acc.balance) return alert('Insufficient funds');
+
+            if (type === 'Deposit') acc.balance = parseFloat(acc.balance) + amount;
+            if (type === 'Withdrawal') acc.balance = parseFloat(acc.balance) - amount;
+            if (type === 'Transfer') {
+                const dest = prompt('Enter destination account number:');
+                const destNo = parseInt(dest);
+                const destAcc = accounts.find(a => a.accountNo === destNo);
+                if (!destAcc) return alert('Destination account not found');
+                if (amount > acc.balance) return alert('Insufficient funds for transfer');
+                acc.balance -= amount;
+                destAcc.balance = parseFloat(destAcc.balance) + amount;
+                transactions.push({ id: counters.transactionId++, accountNo: destNo, type: 'Deposit', amount: amount, description: `Transfer from ${accountNo} ${description}`, date: new Date().toISOString() });
+            }
+
+            transactions.push({ id: counters.transactionId++, accountNo, type, amount, description, date: new Date().toISOString() });
+            saveAll(); renderAccounts(); renderTransactions(); updateDashboard();
+            bootstrap.Modal.getInstance(document.getElementById('transactionModal')).hide();
+        }
+
+        function renderTransactions() {
+            const tbody = document.getElementById('transactionsTable');
+            if (transactions.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" class="text-center">No transactions found</td></tr>';
+                return;
+            }
+            tbody.innerHTML = transactions.slice().reverse().map(t => `\n                <tr>\n                    <td>${t.id}</td>\n                    <td>${t.accountNo}</td>\n                    <td>${t.type}</td>\n                    <td>${formatCurrency(t.amount)}</td>\n                    <td>${new Date(t.date).toLocaleString()}</td>\n                    <td>${t.description || ''}</td>\n                </tr>\n            `).join('');
+        }
+
+        // Loans
+        function openLoanModal() {
+            document.getElementById('loanForm').reset();
+            populateLoanCustomerSelect();
+            new bootstrap.Modal(document.getElementById('loanModal')).show();
+        }
+
+        function populateLoanCustomerSelect() {
+            const sel = document.getElementById('loanCustomer');
+            sel.innerHTML = '<option value="">Choose customer...</option>' + customers.map(c => `<option value="${c.id}">${c.name} (#${c.id})</option>`).join('');
+        }
+
+        function addLoan() {
+            const customerId = parseInt(document.getElementById('loanCustomer').value);
+            const type = document.getElementById('loanType').value;
+            const amount = parseFloat(document.getElementById('loanAmount').value) || 0;
+            const interestRate = parseFloat(document.getElementById('loanInterest').value) || 0;
+            const duration = parseInt(document.getElementById('loanDuration').value) || 0;
+            if (!customerId || amount <= 0) return alert('Customer and amount required');
+            loans.push({ id: counters.loanId++, customerId, type, amount, interestRate, duration, status: 'Pending' });
+            saveAll(); renderLoans(); updateDashboard();
+            bootstrap.Modal.getInstance(document.getElementById('loanModal')).hide();
+        }
+
+        function renderLoans() {
+            const tbody = document.getElementById('loansTable');
+            if (loans.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" class="text-center">No loans found</td></tr>';
+                return;
+            }
+            tbody.innerHTML = loans.slice().reverse().map(l => `\n                <tr>\n                    <td>${l.id}</td>\n                    <td>${getCustomerName(l.customerId)}</td>\n                    <td>${l.type}</td>\n                    <td>${formatCurrency(l.amount)}</td>\n                    <td>${l.interestRate}%</td>\n                    <td><span class="status-badge ${l.status === 'Pending' ? 'status-pending' : l.status === 'Approved' ? 'status-active' : 'status-inactive'}">${l.status}</span></td>\n                    <td>\n                        ${l.status === 'Pending' ? `<button class="btn btn-sm btn-success" onclick="approveLoan(${l.id})">Approve</button> <button class="btn btn-sm btn-danger" onclick="rejectLoan(${l.id})">Reject</button>` : ''}\n                    </td>\n                </tr>\n            `).join('');
+        }
+
+        function approveLoan(id) {
+            const loan = loans.find(l => l.id === id);
+            if (!loan) return alert('Loan not found');
+            loan.status = 'Approved';
+            // credit to first active account of customer
+            const acc = accounts.find(a => a.customerId === loan.customerId && a.status === 'Active');
+            if (acc) {
+                acc.balance = parseFloat(acc.balance) + loan.amount;
+                transactions.push({ id: counters.transactionId++, accountNo: acc.accountNo, type: 'Deposit', amount: loan.amount, description: `Loan approved (#${loan.id})`, date: new Date().toISOString() });
+            }
+            saveAll(); renderLoans(); renderAccounts(); renderTransactions(); updateDashboard();
+        }
+
+        function rejectLoan(id) {
+            const loan = loans.find(l => l.id === id);
+            if (!loan) return alert('Loan not found');
+            loan.status = 'Rejected';
+            saveAll(); renderLoans(); updateDashboard();
+        }
+
+        // Utilities
+        function populateSelects() {
+            populateAccountCustomerSelect();
+            populateLoanCustomerSelect();
+            populateTransactionAccountSelect();
+        }
+
+        function formatCurrency(num) { return '$' + Number(num).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+
+        // Boot
+        (function boot() {
+            try { loadAll(); } catch(e) { console.warn('Could not load storage', e); }
+            initializeSampleData();
+            renderCustomers();
+            renderAccounts();
+            renderTransactions();
+            renderLoans();
+            populateSelects();
+            updateDashboard();
+            // expose some functions for inline onclicks
+            window.openCustomerModal = openCustomerModal;
+            window.addCustomer = addCustomer;
+            window.openAccountModal = openAccountModal;
+            window.createAccount = createAccount;
+            window.openTransactionModal = openTransactionModal;
+            window.addTransaction = addTransaction;
+            window.openLoanModal = openLoanModal;
+            window.addLoan = addLoan;
+            window.approveLoan = approveLoan;
+            window.rejectLoan = rejectLoan;
+            window.viewCustomer = viewCustomer;
+            window.deleteCustomer = deleteCustomer;
+            window.quickDeposit = quickDeposit;
+            window.quickWithdraw = quickWithdraw;
+            window.searchCustomers = searchCustomers;
+        })();
+    </script>
