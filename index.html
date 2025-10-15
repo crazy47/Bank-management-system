@@ -28,6 +28,7 @@
             padding-top: 20px;
             transition: all 0.3s;
             z-index: 1000;
+            overflow-y: auto;
         }
 
         .sidebar .brand {
@@ -66,6 +67,31 @@
             margin-left: 250px;
             padding: 20px;
             transition: all 0.3s;
+        }
+
+        /* Responsive helpers */
+        .topbar-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .hamburger {
+            display: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 6px;
+            background: #f1f3f5;
+            border: none;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+
+        /* Make tables horizontally scrollable on small screens */
+        .table-responsive-wrap {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
         }
 
         .top-bar {
@@ -184,6 +210,43 @@
             color: #007bff;
             font-weight: bold;
         }
+
+        /* Media queries for responsiveness */
+        @media (max-width: 991.98px) {
+            .sidebar {
+                transform: translateX(-100%);
+                width: 220px;
+            }
+
+            .sidebar.open {
+                transform: translateX(0);
+            }
+
+            .main-content {
+                margin-left: 0;
+                padding: 12px;
+            }
+
+            .hamburger {
+                display: inline-flex;
+            }
+
+            .top-bar {
+                padding: 10px;
+                flex-direction: row;
+                gap: 8px;
+            }
+
+            .top-bar .me-3 { display: none; }
+        }
+
+        @media (max-width: 575.98px) {
+            .stats-card .icon { width: 44px; height: 44px; font-size: 20px; }
+            .stats-card h3 { font-size: 1.2rem; }
+            .sidebar { width: 200px; }
+            .brand h4 { font-size: 1rem; }
+            .nav-item { padding: 12px 16px; }
+        }
     </style>
 </head>
 <body>
@@ -217,10 +280,13 @@
     <!-- Main Content -->
     <div class="main-content">
         <!-- Top Bar -->
-        <div class="top-bar">
-            <div>
-                <h5 class="mb-0">Banking Management System</h5>
-                <small class="text-muted">Admin Dashboard</small>
+        <div class="top-bar d-flex justify-content-between align-items-center">
+            <div class="topbar-left">
+                <button class="hamburger" id="hamburgerBtn" aria-label="Toggle navigation"><i class="fas fa-bars"></i></button>
+                <div>
+                    <h5 class="mb-0">Banking Management System</h5>
+                    <small class="text-muted">Admin Dashboard</small>
+                </div>
             </div>
             <div>
                 <span class="me-3"><i class="far fa-bell"></i> <span class="badge bg-danger">3</span></span>
@@ -264,7 +330,7 @@
 
             <div class="row mt-4">
                 <div class="col-md-6">
-                    <div class="table-container">
+                    <div class="table-container table-responsive-wrap">
                         <h5 class="mb-3">Recent Transactions</h5>
                         <table class="table table-sm">
                             <thead>
@@ -282,7 +348,7 @@
                     </div>
                 </div>
                 <div class="col-md-6">
-                    <div class="table-container">
+                    <div class="table-container table-responsive-wrap">
                         <h5 class="mb-3">Pending Loan Requests</h5>
                         <table class="table table-sm">
                             <thead>
@@ -315,7 +381,7 @@
                 <input type="text" class="form-control" id="customerSearch" placeholder="Search customers..." onkeyup="searchCustomers()">
             </div>
 
-            <div class="table-container">
+            <div class="table-container table-responsive-wrap">
                 <table class="table table-hover">
                     <thead>
                         <tr>
@@ -343,7 +409,7 @@
                 </button>
             </div>
 
-            <div class="table-container">
+            <div class="table-container table-responsive-wrap">
                 <table class="table table-hover">
                     <thead>
                         <tr>
@@ -371,7 +437,7 @@
                 </button>
             </div>
 
-            <div class="table-container">
+            <div class="table-container table-responsive-wrap">
                 <table class="table table-hover">
                     <thead>
                         <tr>
@@ -399,7 +465,7 @@
                 </button>
             </div>
 
-            <div class="table-container">
+            <div class="table-container table-responsive-wrap">
                 <table class="table table-hover">
                     <thead>
                         <tr>
@@ -424,7 +490,7 @@
             <h4 class="mb-4">Reports & Analytics</h4>
             <div class="row">
                 <div class="col-md-12">
-                    <div class="table-container">
+                    <div class="table-container table-responsive-wrap">
                         <h5>Generate Reports</h5>
                         <div class="row mt-3">
                             <div class="col-md-3">
@@ -967,4 +1033,26 @@
             window.quickWithdraw = quickWithdraw;
             window.searchCustomers = searchCustomers;
         })();
+            // Sidebar toggle for small screens
+            (function mobileNav() {
+                const hamburger = document.getElementById('hamburgerBtn');
+                const sidebar = document.querySelector('.sidebar');
+                if (!hamburger || !sidebar) return;
+                hamburger.addEventListener('click', () => {
+                    sidebar.classList.toggle('open');
+                });
+                // close sidebar after navigation on small screens
+                document.querySelectorAll('.sidebar .nav-item').forEach(item => {
+                    item.addEventListener('click', () => {
+                        if (window.innerWidth < 992) sidebar.classList.remove('open');
+                    });
+                });
+                // close when clicking outside on small screens
+                document.addEventListener('click', (e) => {
+                    if (window.innerWidth >= 992) return;
+                    if (!sidebar.contains(e.target) && !hamburger.contains(e.target)) {
+                        sidebar.classList.remove('open');
+                    }
+                });
+            })();
     </script>
